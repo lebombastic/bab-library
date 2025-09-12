@@ -7,7 +7,7 @@ export function JoinBabPopup() {
   const [isOpen, setIsOpen] = useState(false);
   
   // WhatsApp group link - you can update this with your actual group link
-  const whatsappGroupLink = "https://chat.whatsapp.com/your-bab-group-link";
+  const whatsappGroupLink = "https://chat.whatsapp.com/Jaad8oEOUrDDxPMRkGmRbb?mode=ems_copy_c";
   
   // Generate QR code using QR Server API
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(whatsappGroupLink)}`;
