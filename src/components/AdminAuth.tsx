@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -22,7 +22,7 @@ interface AdminAuthProps {
   onRemoveTemplate: (templateId: string) => void;
 }
 
-const ADMIN_PASSWORD = "admin123"; // In production, this should be properly secured
+// Admin password is stored in Supabase settings table under key 'admin_password_hash'
 
 export function AdminAuth({ 
   onAddBook, 
@@ -40,23 +40,39 @@ export function AdminAuth({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  // Lazy load to reduce initial bundle; delegate verification to server via RPC
+  const verifyPassword = async (candidate: string) => {
+    try {
+      const { supabase } = await import('../lib/supabaseClient');
+      const { data, error } = await supabase.rpc('verify_admin_password', { candidate });
+      if (error) {
+        console.error('RPC error', error);
+        return false;
+      }
+      return Boolean(data);
+    } catch (e) {
+      console.error('Password verification failed', e);
+      return false;
+    }
+  };
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setIsAuthOpen(false);
-      setPassword("");
-      setError("");
-      // Keep authentication for 1 hour
-      setTimeout(() => {
-        setIsAuthenticated(false);
-      }, 60 * 60 * 1000);
-    } else {
+    setIsLoading(true);
+    const ok = await verifyPassword(password);
+    setIsLoading(false);
+    if (!ok) {
       setError("Incorrect password");
       setPassword("");
+      return;
     }
+    setIsAuthenticated(true);
+    setIsAuthOpen(false);
+    setPassword("");
+    setError("");
+    setTimeout(() => setIsAuthenticated(false), 60 * 60 * 1000);
   };
 
   const handleDialogOpenChange = (open: boolean) => {
@@ -122,7 +138,7 @@ export function AdminAuth({
           </div>
           
           <Button type="submit" className="w-full">
-            Authenticate
+            {isLoading ? 'Authenticating…' : 'Authenticate'}
           </Button>
           
           {/* <div className="text-center">

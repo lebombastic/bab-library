@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BookCard, Book } from "./components/BookCard";
 import { BookModal } from "./components/BookModal";
 import { LibraryHeader } from "./components/LibraryHeader";
@@ -106,46 +106,140 @@ export default function App() {
   };
 
   const handleAddBook = (newBook: Omit<Book, 'id'>) => {
-    const book: Book = {
-      ...newBook,
-      id: Date.now().toString()
-    };
+    const book: Book = { ...newBook, id: Date.now().toString() };
     setBooks(prev => [...prev, book]);
+    // Persist
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('books').insert({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        genre: book.genre,
+        available: book.available,
+        description: book.description,
+        cover_image: book.coverImage
+      });
+    });
   };
 
   const handleUpdateBook = (bookId: string, updates: Partial<Book>) => {
     setBooks(prev => prev.map(book => 
       book.id === bookId ? { ...book, ...updates } : book
     ));
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('books').update({
+        title: updates.title,
+        author: updates.author,
+        genre: updates.genre,
+        available: updates.available,
+        description: updates.description,
+        cover_image: updates.coverImage
+      }).eq('id', bookId);
+    });
   };
 
   const handleRemoveBook = (bookId: string) => {
     setBooks(prev => prev.filter(book => book.id !== bookId));
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('books').delete().eq('id', bookId);
+    });
   };
 
   const handleAddEvent = (newEvent: Omit<Event, 'id'>) => {
-    const event: Event = {
-      ...newEvent,
-      id: Date.now().toString()
-    };
+    const event: Event = { ...newEvent, id: Date.now().toString() };
     setEvents(prev => [...prev, event]);
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('events').insert({
+        id: event.id,
+        title: event.title,
+        date: event.date,
+        time: event.time,
+        description: event.description,
+        whatsapp_group: event.whatsappGroup
+      });
+    });
   };
 
   const handleRemoveEvent = (eventId: string) => {
     setEvents(prev => prev.filter(event => event.id !== eventId));
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('events').delete().eq('id', eventId);
+    });
   };
 
   const handleAddTemplate = (newTemplate: Omit<EventTemplate, 'id'>) => {
-    const template: EventTemplate = {
-      ...newTemplate,
-      id: Date.now().toString()
-    };
+    const template: EventTemplate = { ...newTemplate, id: Date.now().toString() };
     setTemplates(prev => [...prev, template]);
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('event_templates').insert({
+        id: template.id,
+        title: template.title,
+        default_time: template.defaultTime,
+        description: template.description,
+        whatsapp_group: template.whatsappGroup,
+        category: template.category
+      });
+    });
   };
 
   const handleRemoveTemplate = (templateId: string) => {
     setTemplates(prev => prev.filter(template => template.id !== templateId));
+    import('./lib/supabaseClient').then(async ({ supabase }) => {
+      await supabase.from('event_templates').delete().eq('id', templateId);
+    });
   };
+
+  // Initial load from Supabase if configured
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase } = await import('./lib/supabaseClient');
+        if (!supabase) return;
+        const [booksRes, eventsRes, templatesRes] = await Promise.all([
+          supabase.from('books').select('*'),
+          supabase.from('events').select('*'),
+          supabase.from('event_templates').select('*')
+        ]);
+        if (!cancelled) {
+          if (booksRes.data) {
+            setBooks(booksRes.data.map((b: any) => ({
+              id: b.id,
+              title: b.title,
+              author: b.author,
+              genre: b.genre,
+              available: b.available,
+              description: b.description,
+              coverImage: b.cover_image
+            })));
+          }
+          if (eventsRes.data) {
+            setEvents(eventsRes.data.map((e: any) => ({
+              id: e.id,
+              title: e.title,
+              date: e.date,
+              time: e.time,
+              description: e.description,
+              whatsappGroup: e.whatsapp_group
+            })));
+          }
+          if (templatesRes.data) {
+            setTemplates(templatesRes.data.map((t: any) => ({
+              id: t.id,
+              title: t.title,
+              defaultTime: t.default_time,
+              description: t.description,
+              whatsappGroup: t.whatsapp_group,
+              category: t.category
+            })));
+          }
+        }
+      } catch {
+        // ignore if not configured
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const genres = Array.from(new Set(books.map(book => book.genre))).sort();
   
