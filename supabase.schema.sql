@@ -41,10 +41,17 @@ alter table public.settings enable row level security;
 drop policy if exists "Allow anon read" on public.books;
 drop policy if exists "Allow anon read" on public.events;
 drop policy if exists "Allow anon read" on public.event_templates;
+drop policy if exists "Allow anon write" on public.books;
+drop policy if exists "Allow anon write" on public.events;
+drop policy if exists "Allow anon write" on public.event_templates;
 
 create policy "Allow anon read" on public.books for select using (true);
 create policy "Allow anon read" on public.events for select using (true);
 create policy "Allow anon read" on public.event_templates for select using (true);
+
+create policy "Allow anon write" on public.books for all using (true);
+create policy "Allow anon write" on public.events for all using (true);
+create policy "Allow anon write" on public.event_templates for all using (true);
 -- Do NOT allow reading settings without auth in production. For demo only you may allow select, better to protect settings.
 
 -- Secure password verification function (server-side)

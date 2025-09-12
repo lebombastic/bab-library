@@ -209,7 +209,7 @@ export function AdminForm({
         </DialogHeader>
         
         <Tabs defaultValue="add" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 text-xs">
+          <TabsList className="grid w-full grid-cols-5 text-xs">
             <TabsTrigger value="add">Add Book</TabsTrigger>
             <TabsTrigger value="manage">Manage Books</TabsTrigger>
             <TabsTrigger value="add-event">Add Event</TabsTrigger>
