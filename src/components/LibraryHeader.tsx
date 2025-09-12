@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Grid3X3, List, Rows3, BookOpen, Moon, Sun } from "lucide-react";
 import { AdminAuth } from "./AdminAuth";
+import { JoinBabPopup } from "./JoinBabPopup";
 import { Book } from "./BookCard";
 import { Event } from "./EventsSection";
 import { EventTemplate } from "./EventTemplateManager";
@@ -56,8 +57,9 @@ export function LibraryHeader({
           <BookOpen className="w-8 h-8" />
           <div>
             <h1>Library</h1>
-            <p className="text-muted-foreground text-sm">Discover and rent books</p>
+            <JoinBabPopup />
           </div>
+          <p className="text-muted-foreground text-sm">Discover and rent books</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
