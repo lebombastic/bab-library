@@ -55,7 +55,7 @@ export function LibraryHeader({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <BookOpen className="w-8 h-8" />
-          <div>
+          <div className="flex items-center gap-3">
             <h1>Library</h1>
             <JoinBabPopup />
           </div>
