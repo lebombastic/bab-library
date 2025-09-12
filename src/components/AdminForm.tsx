@@ -10,10 +10,9 @@ import { Switch } from "./ui/switch";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
-import { Plus, Settings, Book as BookIcon, Calendar, Trash2, FileText, Search, Edit3, Loader2 } from "lucide-react";
+import { Plus, Settings, Book as BookIcon, Calendar, Trash2, Search, Edit3, Loader2 } from "lucide-react";
 import { Book } from "./BookCard";
 import { Event } from "./EventsSection";
-import { EventTemplateManager, EventTemplate } from "./EventTemplateManager";
 
 interface AdminFormProps {
   onAddBook: (book: Omit<Book, 'id'>) => void;
@@ -23,9 +22,6 @@ interface AdminFormProps {
   onAddEvent: (event: Omit<Event, 'id'>) => void;
   onRemoveEvent: (eventId: string) => void;
   events: Event[];
-  templates: EventTemplate[];
-  onAddTemplate: (template: Omit<EventTemplate, 'id'>) => void;
-  onRemoveTemplate: (templateId: string) => void;
 }
 
 const GENRES = [
@@ -57,10 +53,7 @@ export function AdminForm({
   books, 
   onAddEvent, 
   onRemoveEvent, 
-  events,
-  templates,
-  onAddTemplate,
-  onRemoveTemplate
+  events
 }: AdminFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [addMode, setAddMode] = useState<'search' | 'manual'>('search');
@@ -121,6 +114,9 @@ export function AdminForm({
       description: `Published in ${book.first_publish_year || "Unknown year"}. ${book.subject?.slice(0, 3).join(", ") || ""}`,
       coverImage: coverUrl
     });
+    
+    // Switch to manual mode to allow editing
+    setAddMode('manual');
   };
 
   const getCoverImageUrl = (coverId: number) => {
@@ -154,6 +150,7 @@ export function AdminForm({
     setSelectedSearchResult(null);
     setSearchResults([]);
     setSearchQuery("");
+    setAddMode('search'); // Reset to search mode
   };
 
   const handleStatusToggle = (bookId: string, currentStatus: boolean) => {
@@ -190,15 +187,6 @@ export function AdminForm({
     onRemoveBook(bookId);
   };
 
-  const handleCreateEventFromTemplate = (template: EventTemplate, date: string) => {
-    onAddEvent({
-      title: template.title,
-      date: date,
-      time: template.defaultTime,
-      description: template.description,
-      whatsappGroup: template.whatsappGroup
-    });
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -221,12 +209,11 @@ export function AdminForm({
         </DialogHeader>
         
         <Tabs defaultValue="add" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 text-xs">
+          <TabsList className="grid w-full grid-cols-4 text-xs">
             <TabsTrigger value="add">Add Book</TabsTrigger>
             <TabsTrigger value="manage">Manage Books</TabsTrigger>
             <TabsTrigger value="add-event">Add Event</TabsTrigger>
             <TabsTrigger value="manage-events">Manage Events</TabsTrigger>
-            {/* <TabsTrigger value="templates">Templates</TabsTrigger> */}
           </TabsList>
           
           <TabsContent value="add" className="space-y-6">
@@ -622,14 +609,6 @@ export function AdminForm({
             </div>
           </TabsContent>
 
-          <TabsContent value="templates" className="space-y-4">
-            <EventTemplateManager
-              templates={templates}
-              onAddTemplate={onAddTemplate}
-              onRemoveTemplate={onRemoveTemplate}
-              onCreateEventFromTemplate={handleCreateEventFromTemplate}
-            />
-          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>

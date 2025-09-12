@@ -3,7 +3,6 @@ import { BookCard, Book } from "./components/BookCard";
 import { BookModal } from "./components/BookModal";
 import { LibraryHeader } from "./components/LibraryHeader";
 import { EventsSection, Event } from "./components/EventsSection";
-import { EventTemplate } from "./components/EventTemplateManager";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 const INITIAL_BOOKS: Book[] = [
@@ -63,37 +62,10 @@ const INITIAL_EVENTS: Event[] = [
   }
 ];
 
-const INITIAL_TEMPLATES: EventTemplate[] = [
-  {
-    id: "1",
-    title: "Silent Reading Session",
-    defaultTime: "6:00 PM - 8:00 PM",
-    description: "Join us for a peaceful evening of silent reading. Bring your favorite book or choose from our collection. Refreshments will be provided.",
-    whatsappGroup: "https://chat.whatsapp.com/silent-reading-group",
-    category: "Reading"
-  },
-  {
-    id: "2",
-    title: "Book Club Discussion",
-    defaultTime: "2:00 PM - 4:00 PM",
-    description: "Monthly book discussion session. Come share your thoughts and insights with fellow book lovers.",
-    whatsappGroup: "https://chat.whatsapp.com/book-club-discussion",
-    category: "Discussion"
-  },
-  {
-    id: "3",
-    title: "Writing Workshop",
-    defaultTime: "10:00 AM - 12:00 PM",
-    description: "Creative writing workshop for aspiring authors. Bring your notebook and imagination.",
-    whatsappGroup: "https://chat.whatsapp.com/writing-workshop",
-    category: "Workshop"
-  }
-];
 
 export default function App() {
   const [books, setBooks] = useState<Book[]>(INITIAL_BOOKS);
   const [events, setEvents] = useState<Event[]>(INITIAL_EVENTS);
-  const [templates, setTemplates] = useState<EventTemplate[]>(INITIAL_TEMPLATES);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [layout, setLayout] = useState<'grid' | 'list' | 'compact'>('grid');
@@ -106,19 +78,33 @@ export default function App() {
   };
 
   const handleAddBook = (newBook: Omit<Book, 'id'>) => {
-    const book: Book = { ...newBook, id: Date.now().toString() };
-    setBooks(prev => [...prev, book]);
-    // Persist
+    // Persist to Supabase first to get the UUID
     import('./lib/supabaseClient').then(async ({ supabase }) => {
-      await supabase.from('books').insert({
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        genre: book.genre,
-        available: book.available,
-        description: book.description,
-        cover_image: book.coverImage
-      });
+      const { data, error } = await supabase.from('books').insert({
+        title: newBook.title,
+        author: newBook.author,
+        genre: newBook.genre,
+        available: newBook.available,
+        description: newBook.description,
+        cover_image: newBook.coverImage
+      }).select().single();
+      
+      if (error) {
+        console.error('Error adding book:', error);
+        return;
+      }
+      
+      // Update local state with the returned book (including UUID)
+      const book: Book = {
+        id: data.id,
+        title: data.title,
+        author: data.author,
+        genre: data.genre,
+        available: data.available,
+        description: data.description,
+        coverImage: data.cover_image
+      };
+      setBooks(prev => [...prev, book]);
     });
   };
 
@@ -146,17 +132,29 @@ export default function App() {
   };
 
   const handleAddEvent = (newEvent: Omit<Event, 'id'>) => {
-    const event: Event = { ...newEvent, id: Date.now().toString() };
-    setEvents(prev => [...prev, event]);
     import('./lib/supabaseClient').then(async ({ supabase }) => {
-      await supabase.from('events').insert({
-        id: event.id,
-        title: event.title,
-        date: event.date,
-        time: event.time,
-        description: event.description,
-        whatsapp_group: event.whatsappGroup
-      });
+      const { data, error } = await supabase.from('events').insert({
+        title: newEvent.title,
+        date: newEvent.date,
+        time: newEvent.time,
+        description: newEvent.description,
+        whatsapp_group: newEvent.whatsappGroup
+      }).select().single();
+      
+      if (error) {
+        console.error('Error adding event:', error);
+        return;
+      }
+      
+      const event: Event = {
+        id: data.id,
+        title: data.title,
+        date: data.date,
+        time: data.time,
+        description: data.description,
+        whatsappGroup: data.whatsapp_group
+      };
+      setEvents(prev => [...prev, event]);
     });
   };
 
@@ -167,27 +165,6 @@ export default function App() {
     });
   };
 
-  const handleAddTemplate = (newTemplate: Omit<EventTemplate, 'id'>) => {
-    const template: EventTemplate = { ...newTemplate, id: Date.now().toString() };
-    setTemplates(prev => [...prev, template]);
-    import('./lib/supabaseClient').then(async ({ supabase }) => {
-      await supabase.from('event_templates').insert({
-        id: template.id,
-        title: template.title,
-        default_time: template.defaultTime,
-        description: template.description,
-        whatsapp_group: template.whatsappGroup,
-        category: template.category
-      });
-    });
-  };
-
-  const handleRemoveTemplate = (templateId: string) => {
-    setTemplates(prev => prev.filter(template => template.id !== templateId));
-    import('./lib/supabaseClient').then(async ({ supabase }) => {
-      await supabase.from('event_templates').delete().eq('id', templateId);
-    });
-  };
 
   // Initial load from Supabase if configured
   useEffect(() => {
@@ -196,10 +173,9 @@ export default function App() {
       try {
         const { supabase } = await import('./lib/supabaseClient');
         if (!supabase) return;
-        const [booksRes, eventsRes, templatesRes] = await Promise.all([
+        const [booksRes, eventsRes] = await Promise.all([
           supabase.from('books').select('*'),
-          supabase.from('events').select('*'),
-          supabase.from('event_templates').select('*')
+          supabase.from('events').select('*')
         ]);
         if (!cancelled) {
           if (booksRes.data) {
@@ -221,16 +197,6 @@ export default function App() {
               time: e.time,
               description: e.description,
               whatsappGroup: e.whatsapp_group
-            })));
-          }
-          if (templatesRes.data) {
-            setTemplates(templatesRes.data.map((t: any) => ({
-              id: t.id,
-              title: t.title,
-              defaultTime: t.default_time,
-              description: t.description,
-              whatsappGroup: t.whatsapp_group,
-              category: t.category
             })));
           }
         }
@@ -277,9 +243,6 @@ export default function App() {
             onAddEvent={handleAddEvent}
             onRemoveEvent={handleRemoveEvent}
             events={events}
-            templates={templates}
-            onAddTemplate={handleAddTemplate}
-            onRemoveTemplate={handleRemoveTemplate}
           />
           
           <div className="mt-8">

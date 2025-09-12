@@ -6,7 +6,6 @@ import { AdminAuth } from "./AdminAuth";
 import { JoinBabPopup } from "./JoinBabPopup";
 import { Book } from "./BookCard";
 import { Event } from "./EventsSection";
-import { EventTemplate } from "./EventTemplateManager";
 import { useTheme } from "./ThemeProvider";
 
 interface LibraryHeaderProps {
@@ -24,9 +23,6 @@ interface LibraryHeaderProps {
   onAddEvent: (event: Omit<Event, 'id'>) => void;
   onRemoveEvent: (eventId: string) => void;
   events: Event[];
-  templates: EventTemplate[];
-  onAddTemplate: (template: Omit<EventTemplate, 'id'>) => void;
-  onRemoveTemplate: (templateId: string) => void;
 }
 
 export function LibraryHeader({ 
@@ -34,19 +30,16 @@ export function LibraryHeader({
   onLayoutChange, 
   selectedGenre, 
   onGenreChange, 
-  genres,
-  onAddBook,
-  onUpdateBook,
-  onRemoveBook,
-  currentView,
-  onViewChange,
-  books,
-  onAddEvent,
-  onRemoveEvent,
-  events,
-  templates,
-  onAddTemplate,
-  onRemoveTemplate
+  genres, 
+  onAddBook, 
+  onUpdateBook, 
+  onRemoveBook, 
+  currentView, 
+  onViewChange, 
+  books, 
+  onAddEvent, 
+  onRemoveEvent, 
+  events
 }: LibraryHeaderProps) {
   const { theme, toggleTheme } = useTheme();
 
@@ -73,18 +66,15 @@ export function LibraryHeader({
             {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             {theme === "light" ? "Dark" : "Light"}
           </Button>
-          <AdminAuth 
-            onAddBook={onAddBook} 
-            onUpdateBook={onUpdateBook}
-            onRemoveBook={onRemoveBook}
-            books={books}
-            onAddEvent={onAddEvent}
-            onRemoveEvent={onRemoveEvent}
-            events={events}
-            templates={templates}
-            onAddTemplate={onAddTemplate}
-            onRemoveTemplate={onRemoveTemplate}
-          />
+        <AdminAuth 
+          onAddBook={onAddBook} 
+          onUpdateBook={onUpdateBook}
+          onRemoveBook={onRemoveBook}
+          books={books}
+          onAddEvent={onAddEvent}
+          onRemoveEvent={onRemoveEvent}
+          events={events}
+        />
         </div>
       </div>
       

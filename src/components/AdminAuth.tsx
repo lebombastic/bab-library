@@ -7,7 +7,6 @@ import { Settings, Lock } from "lucide-react";
 import { AdminForm } from "./AdminForm";
 import { Book } from "./BookCard";
 import { Event } from "./EventsSection";
-import { EventTemplate } from "./EventTemplateManager";
 
 interface AdminAuthProps {
   onAddBook: (book: Omit<Book, 'id'>) => void;
@@ -17,9 +16,6 @@ interface AdminAuthProps {
   onAddEvent: (event: Omit<Event, 'id'>) => void;
   onRemoveEvent: (eventId: string) => void;
   events: Event[];
-  templates: EventTemplate[];
-  onAddTemplate: (template: Omit<EventTemplate, 'id'>) => void;
-  onRemoveTemplate: (templateId: string) => void;
 }
 
 // Admin password is stored in Supabase settings table under key 'admin_password_hash'
@@ -31,10 +27,7 @@ export function AdminAuth({
   books, 
   onAddEvent, 
   onRemoveEvent, 
-  events,
-  templates,
-  onAddTemplate,
-  onRemoveTemplate
+  events
 }: AdminAuthProps) {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -93,9 +86,6 @@ export function AdminAuth({
         onAddEvent={onAddEvent}
         onRemoveEvent={onRemoveEvent}
         events={events}
-        templates={templates}
-        onAddTemplate={onAddTemplate}
-        onRemoveTemplate={onRemoveTemplate}
       />
     );
   }
