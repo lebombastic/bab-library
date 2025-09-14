@@ -197,7 +197,7 @@ export function AdminForm({
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl w-[95vw] mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" />
@@ -209,7 +209,7 @@ export function AdminForm({
         </DialogHeader>
         
         <Tabs defaultValue="add" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 text-xs">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 text-xs">
             <TabsTrigger value="add">Add Book</TabsTrigger>
             <TabsTrigger value="manage">Manage Books</TabsTrigger>
             <TabsTrigger value="add-event">Add Event</TabsTrigger>

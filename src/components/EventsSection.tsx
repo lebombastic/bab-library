@@ -24,11 +24,11 @@ export function EventsSection({ events }: EventsSectionProps) {
 
   if (events.length === 0) {
     return (
-      <div className="flex gap-8">
-        <div className="flex-1 text-center py-12">
+      <div className="space-y-6">
+        <div className="text-center py-12">
           <p className="text-muted-foreground">No upcoming events scheduled</p>
         </div>
-        <div className="md:block">
+        <div className="flex justify-center lg:justify-end">
           <EventCalendar events={events} />
         </div>
       </div>
@@ -36,7 +36,7 @@ export function EventsSection({ events }: EventsSectionProps) {
   }
 
   return (
-    <div className="flex gap-8">
+    <div className="space-y-6 lg:space-y-0 lg:flex lg:gap-8">
       <div className="flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {events.map((event) => (
@@ -61,7 +61,7 @@ export function EventsSection({ events }: EventsSectionProps) {
                 <CardDescription className="mb-4">
                   {event.description}
                 </CardDescription>
-                <Button 
+                <Button
                   onClick={() => handleWhatsAppClick(event.whatsappGroup)}
                   className="w-full gap-2"
                 >
@@ -73,8 +73,8 @@ export function EventsSection({ events }: EventsSectionProps) {
           ))}
         </div>
       </div>
-      
-      <div className="hidden lg:block">
+
+      <div className="flex justify-center lg:justify-start lg:block">
         <EventCalendar events={events} />
       </div>
     </div>

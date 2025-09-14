@@ -81,7 +81,7 @@ export function EventCalendar({ events }: EventCalendarProps) {
   }
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm mx-auto lg:mx-0">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -124,10 +124,10 @@ export function EventCalendar({ events }: EventCalendarProps) {
             <div
               key={index}
               className={`
-                h-8 w-8 flex items-center justify-center text-sm rounded-sm
-                ${day === null ? '' : 'hover:bg-muted/50 cursor-pointer'}
-                ${day && eventDates.has(day.toString()) 
-                  ? 'bg-primary text-primary-foreground font-medium' 
+                h-9 w-9 flex items-center justify-center text-sm rounded-sm transition-colors
+                ${day === null ? '' : 'hover:bg-muted/50 cursor-pointer active:bg-muted'}
+                ${day && eventDates.has(day.toString())
+                  ? 'bg-primary text-primary-foreground font-medium'
                   : day ? 'text-foreground' : ''
                 }
               `}
