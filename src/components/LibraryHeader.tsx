@@ -50,7 +50,7 @@ export function LibraryHeader({
           <BookOpen className="w-8 h-8" />
           <div>
           <div className="flex items-center gap-3">
-            <h1>Library</h1>
+            <h1>Bab + Library = Bablio</h1>
             <JoinBabPopup />
           </div>
           <p className="text-muted-foreground text-sm">Discover and rent books</p>
