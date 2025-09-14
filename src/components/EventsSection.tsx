@@ -28,7 +28,7 @@ export function EventsSection({ events }: EventsSectionProps) {
         <div className="flex-1 text-center py-12">
           <p className="text-muted-foreground">No upcoming events scheduled</p>
         </div>
-        <div className="hidden md:block">
+        <div className="md:block">
           <EventCalendar events={events} />
         </div>
       </div>
