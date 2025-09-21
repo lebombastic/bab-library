@@ -16,7 +16,7 @@ export function BookModal({ book, isOpen, onClose }: BookModalProps) {
 
   const handleRentClick = () => {
     // WhatsApp group link - replace with actual group link
-    const whatsappLink = `https://wa.me/+201004709848?text=Hi! I'd like to rent "${book.title}" by ${book.author}`;
+    const whatsappLink = `https://chat.whatsapp.com/DmXYUbZ4CjTAli14a4NMGS?mode=ems_copy_t`;
     window.open(whatsappLink, '_blank');
   };
 
