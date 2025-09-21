@@ -1,7 +1,9 @@
+import { useState, useRef, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import { Grid3X3, List, Rows3, BookOpen, Moon, Sun } from "lucide-react";
+import { Grid3X3, List, Rows3, BookOpen, Moon, Sun, Search, X } from "lucide-react";
 import { AdminAuth } from "./AdminAuth";
 import { JoinBabPopup } from "./JoinBabPopup";
 import { Book } from "./BookCard";
@@ -14,6 +16,8 @@ interface LibraryHeaderProps {
   selectedGenre: string;
   onGenreChange: (genre: string) => void;
   genres: string[];
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
   onAddBook: (book: Omit<Book, 'id'>) => void;
   onUpdateBook: (bookId: string, updates: Partial<Book>) => void;
   onRemoveBook: (bookId: string) => void;
@@ -25,23 +29,50 @@ interface LibraryHeaderProps {
   events: Event[];
 }
 
-export function LibraryHeader({ 
-  layout, 
-  onLayoutChange, 
-  selectedGenre, 
-  onGenreChange, 
-  genres, 
-  onAddBook, 
-  onUpdateBook, 
-  onRemoveBook, 
-  currentView, 
-  onViewChange, 
-  books, 
-  onAddEvent, 
-  onRemoveEvent, 
+export function LibraryHeader({
+  layout,
+  onLayoutChange,
+  selectedGenre,
+  onGenreChange,
+  genres,
+  searchTerm,
+  onSearchChange,
+  onAddBook,
+  onUpdateBook,
+  onRemoveBook,
+  currentView,
+  onViewChange,
+  books,
+  onAddEvent,
+  onRemoveEvent,
   events
 }: LibraryHeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isSearchExpanded && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchExpanded]);
+
+  const handleSearchToggle = () => {
+    if (isSearchExpanded && searchTerm) {
+      onSearchChange("");
+    }
+    setIsSearchExpanded(!isSearchExpanded);
+  };
+
+  const handleSearchInputBlur = (e: React.FocusEvent) => {
+    // Check if the focus is moving to the close button
+    if (e.relatedTarget && (e.relatedTarget as Element).closest('.search-container')) {
+      return;
+    }
+    if (!searchTerm) {
+      setIsSearchExpanded(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -102,6 +133,39 @@ export function LibraryHeader({
                   ))}
                 </SelectContent>
               </Select>
+
+              <div className="relative flex items-center search-container">
+                {!isSearchExpanded ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSearchToggle}
+                    className="gap-2 transition-all duration-200"
+                  >
+                    <Search className="w-4 h-4" />
+                    Search
+                  </Button>
+                ) : (
+                  <div className="relative animate-in slide-in-from-right-2 duration-200">
+                    <Input
+                      ref={searchInputRef}
+                      placeholder="Search book titles..."
+                      value={searchTerm}
+                      onChange={(e) => onSearchChange(e.target.value)}
+                      onBlur={handleSearchInputBlur}
+                      className="pr-10 w-64 transition-all duration-200"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSearchToggle}
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           

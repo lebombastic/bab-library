@@ -70,6 +70,7 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [layout, setLayout] = useState<'grid' | 'list' | 'compact'>('grid');
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentView, setCurrentView] = useState<'books' | 'events'>('books');
 
   const handleBookClick = (book: Book) => {
@@ -209,9 +210,13 @@ export default function App() {
 
   const genres = Array.from(new Set(books.map(book => book.genre))).sort();
   
-  const filteredBooks = selectedGenre === "all" 
-    ? books
-    : books.filter(book => book.genre === selectedGenre);
+  const filteredBooks = books.filter(book => {
+    const matchesGenre = selectedGenre === "all" || book.genre === selectedGenre;
+    const matchesSearch = searchTerm === "" ||
+      book.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesGenre && matchesSearch;
+  });
 
   const getLayoutClasses = () => {
     switch (layout) {
@@ -234,6 +239,8 @@ export default function App() {
             selectedGenre={selectedGenre}
             onGenreChange={setSelectedGenre}
             genres={genres}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
             onAddBook={handleAddBook}
             onUpdateBook={handleUpdateBook}
             onRemoveBook={handleRemoveBook}
@@ -250,8 +257,18 @@ export default function App() {
               filteredBooks.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">
-                    {selectedGenre !== "all" ? `No books found in ${selectedGenre} genre` : "No books available"}
+                    {searchTerm ?
+                      `No books found with title matching "${searchTerm}"` :
+                      selectedGenre !== "all" ?
+                        `No books found in ${selectedGenre} genre` :
+                        "No books available"
+                    }
                   </p>
+                  {searchTerm && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Try searching for a different book title or clearing your search
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className={getLayoutClasses()}>
